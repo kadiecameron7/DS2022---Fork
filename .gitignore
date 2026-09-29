@@ -6,6 +6,7 @@ demos/04-sql/create_dbs.sql
 demos/04-sql/drop_tables.sql
 !class/README.md
 labs/*
+!labs/lab-04-sql
 !labs/README.md
 projects/*
 !projects/README.md

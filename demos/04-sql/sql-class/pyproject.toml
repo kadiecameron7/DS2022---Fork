@@ -1,0 +1,21 @@
+[project]
+name = "sql-class"
+version = "0.1.0"
+description = "SQL class examples"
+readme = "README.md"
+authors = [
+    { name = "Kadie Cameron", email = "scn7fw@virginia.edu" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "mysql-connector-python>=26.7.0",
+    "pandas>=3.0.6",
+]
+
+[project.scripts]
+sql-class = "sql_class:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"

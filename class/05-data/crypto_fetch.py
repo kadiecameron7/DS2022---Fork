@@ -7,7 +7,7 @@ params = {
     "per_page": 5,
     "page": 1,
 }
-response = requests.get(url, params=params, timeout=10)
+response = requests.get(url, params=params, timeout=10).json()
 response.raise_for_status()
 
 for coin in response.json():
