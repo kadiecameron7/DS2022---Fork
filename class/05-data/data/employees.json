@@ -1,0 +1,19 @@
+{
+  "employees": [
+    {
+      "name": "Mark Wagner",
+      "email": "mwag@gmail.com",
+      "position": "intern"
+    },
+    {
+      "name": "Tanya Wilson",
+      "email": "tanyaw@gmail.com",
+      "position": "developer"
+    },
+    {
+      "name": "Kamala Stendt",
+      "email": "ks@kamamla.com",
+      "position": "director"
+    }
+  ]
+}
