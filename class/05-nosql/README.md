@@ -4,11 +4,17 @@ The goal of this activity is to familiarize you with NoSQL database systems. The
 
 ## MongoDB
 
-MongoDB helped popularize the NoSQL approach and remains a favorite choice among many developers because of its speed and relative simplicity to work with. Like Redis, MongoDB tables (i.e. "collections") consist of keys and values, but the value side is made up of variable payloads of JSON. This means that one row (i.e. "record" or "document") may contain JSON with a handful of values while the next row contains dozens more. There is no requirement for records to conform to a pre-defined schema or structure.
+MongoDB helped popularize the NoSQL approach and remains a favorite choice among many developers because of its speed and relative simplicity.
+
+**Insert/update data:**
+You typically pass data as **JSON** (human-readable text). MongoDB stores each item as a **document** in a **collection**, using **BSON** (Binary JSON) on disk; BSON is a binary encoding of the same JSON-like structure. Do not confuse collections with SQL tables or documents with table rows (“records”): a collection is a group of documents, and each document is a self-contained JSON-like object. We refer to nested JSON objects inside documents as **subdocuments**. Documents in the same collection need not share the same fields or structure (no fixed schema by default).
+
+**Retrieve data:**
+Queries reverse that path. In `mongosh` you write **JavaScript** that includes human-readable **JSON-like** filters (for example `{ year: 2000 }`). MongoDB matches those filters against **BSON** documents in the collection, then converts the matches and returns them as **JSON** in the shell (or you can write that JSON out to a file).
 
 ![MongoDB Documents](https://media.geeksforgeeks.org/wp-content/uploads/20200726190757/subtractdatabase-648x660.jpg)
 
-Mongo allows developers to search across documents for specific data elements in the JSON tree and to add arbitrary documents within the same collection, with a maximum of 16MB of data per document. This allows Mongo to keep frequently-accessed documents in memory.
+MongoDB lets you store different document shapes in the same collection, with a maximum of 16MB per document. Frequently accessed documents can be kept in memory for fast reads.
 
 MongoDB's strongest features for data science are:
 
@@ -23,20 +29,61 @@ MongoDB's strongest features for data science are:
 
 This course will be using MongoDB Atlas, a cloud-based Mongo service, for hands-on exercises. Follow the [MongoDB Setup instructions](../../setup/mongodb.md).
 
+## Viewing MongoDB in Cursor
+
+You can browse databases, collections, and documents inside Cursor (or VS Code) instead of only using `mongosh`.
+
+1. In [MongoDB Atlas](https://cloud.mongodb.com/), open your cluster and click **Connect**.
+2. Choose **MongoDB for VS Code** and copy the connection string. It looks like:
+
+```text
+mongodb+srv://YOUR_USERNAME:<db_password>@YOUR_CLUSTER.mongodb.net/
+```
+
+3. In Cursor, go to **File** > **New Text File** and paste the connection string into it. Replace `<db_password>` with your real Atlas password (keep the rest of the string). Save that string for the next step.
+4. Install **[MongoDB for VS Code](https://marketplace.visualstudio.com/items?itemName=mongodb.mongodb-vscode)** (`mongodb.mongodb-vscode`) from the Extensions view (`Cmd+Shift+X` / `Ctrl+Shift+X`).
+5. Open the MongoDB sidebar (leaf icon) → **Add Connection** → **Connect with Connection String**. Paste the string from step 3 and press Enter.
+6. Expand the connection to browse databases such as `sample_mflix` and `mypractice`, open collections, and inspect documents.
+
 
 ## In-class exercises
 
+### Sync your local repo
+
+Pull the latest course materials (including new examples and sample files for this activity) before you start. Follow the [Weekly sync](../../README.md#weekly-sync) steps.
+
 ### The `mongosh` CLI tool
 
-Install `mongosh` on your laptop with a package manager (Homebrew or apt). Follow [MongoDB Setup](../../setup/mongodb.md) if you have not already, then confirm:
+`mongosh` is the MongoDB shell: a command-line program you use to connect to Atlas and run database commands interactively.
+
+If you don't have it installed yet, follow [MongoDB Setup](../../setup/mongodb.md), then confirm:
 
 ```bash
 mongosh --version
 ```
 
-**1. Open a terminal** in Cursor (or your usual shell). On Windows, use a **WSL** terminal so `mongosh` and your Atlas env vars match the Linux setup from the course docs.
+**1. Open a terminal** in Cursor (or your usual shell). On Windows, use a **WSL** terminal so `mongosh` and your Atlas environment variables match the Linux setup from the course docs.
 
-**2. Connect**
+**2. Go to this activity folder** before you start `mongosh`. File paths later in the lab (for example `data/fruit.json`) are relative to this directory:
+
+```bash
+cd class/05-nosql
+```
+
+**3. Confirm** your Atlas environment variables:
+```bash
+printenv | grep -i "mongo"
+```
+
+**Example:**
+```text
+MONGODB_ATLAS_URL=mongodb+srv://ds2022.tmwdrjn.mongodb.net/
+MONGODB_ATLAS_USER=mst3k            
+MONGODB_ATLAS_PWD=Pz8MvcN2apydHSZUq
+```
+The values of your url, username, and password will be different. **If you don't have these environment variables set, go back to [Get Connection String](../../setup/mongodb.md#3-get-connection-string-url) and [Save Connection String](../../setup/mongodb.md#4-save-connection-string).**
+
+**4. Connect**
 
 Use the connection string from [MongoDB Setup](../../setup/mongodb.md) (the host below is only an example; **yours will differ**). If you set `MONGODB_ATLAS_*` in `~/.bashrc` / `~/.zshrc`, open a **new** terminal or run `source ~/.bashrc` (or `~/.zshrc`) first. Off campus, make sure your current IP is on the Atlas IP Access List.
 
@@ -62,15 +109,15 @@ For mongosh info see: https://docs.mongodb.com/mongodb-shell/
 Atlas atlas-ct3ynp-shard-0 [primary] test>
 ```
 
-Congrats, you're logged in to the Atlas cluster and you're ready to explore the CLI.
+Congrats, you're logged in to the Atlas cluster and you're ready to explore the CLI. Stay in `mongosh` for the exercises below. When you are ready for Python later, see [Exiting `mongosh`](#exiting-mongosh).
 
-Type `exit` to leave the `mongosh` CLI and return to your bash shell.
+**5. Explore the `sample_mflix` database**
 
-**3. Explore the `sample_mflix` database**
+Most `mongosh` commands use JavaScript syntax: objects, methods, and **dot chaining** to call methods in sequence (e.g. `db.movies.find().limit(3)`). Semicolons are optional; the examples in this lab omit them.
 
 List all databases:
 ```javascript
-show dbs;
+show dbs
 ```
 You should see this list, and possibly a few other databases:
 ```
@@ -85,7 +132,11 @@ If you don't see the `sample_mflix` database, [load Atlas sample data](https://w
 Now, let's switch to the `sample_mflix` database and show all its collections.
 ```javascript
 use sample_mflix
-show collections;
+```
+Note the change of your prompt to `Atlas ... sample_mflix>` indicating the active database.
+
+```javascript
+show collections
 ```
 
 Output of available collections:
@@ -102,41 +153,69 @@ users
 
 ```javascript
 db.movies.findOne()
-db.movies.find().limit(3).pretty()
+db.movies.find().limit(3)
 ```
+
+- `findOne()` returns a single document.
+- With no filter (or several matches), that document is in **natural order** (roughly the first the server finds).
+- Use a filter and/or `sort` when you need a specific document (see [Search with filters](#search-with-filters)).
+- `find()` returns a **cursor** (a handle to zero or more matching documents).
+- Current `mongosh` already prints cursor results as indented JSON, so `.pretty()` usually makes no visible difference.
+- `.pretty()` is optional here; older tutorials still use it. Not every method supports it (do not chain it after `findOne()` or `countDocuments()`).
 
 **Count and sort**
 
 ```javascript
 db.movies.countDocuments()
-db.movies.find().sort({ year: 1 }).limit(5).pretty()
-db.movies.find().sort({ year: -1 }).limit(5).pretty()
+db.movies.find().sort({ year: 1 }).limit(5)
+db.movies.find().sort({ year: -1 }).limit(5)
 ```
 
-### Project only some fields
-
-The second argument to `find()` is a projection: which fields to return. Use `1` to include, `_id: 0` to omit the default `_id`. Example: movies from 2000, returning only `title` and `year`.
-
-```javascript
-db.movies.find({ year: 2000 }, { title: 1, year: 1, _id: 0 }).limit(5).pretty()
-```
+- `countDocuments()` returns how many documents are in the collection.
+- `.sort({ year: 1 })` orders by `year` ascending (`1`); use `-1` for descending.
+- `.limit(5)` keeps only the first five results after sorting.
 
 ### Search with filters
 
-The first argument to `find()` is the filter (query). Use a plain value for equality; use `$gt`, `$lt`, `$gte`, `$lte`, or `$ne` for comparisons; use `$or` with an array to match any of several conditions.
+The first argument to `find()` is the **filter** (which documents to return):
+
+- Plain value: equality (e.g. `{ year: 1994 }`).
+- `$gt`, `$lt`, `$gte`, `$lte`, `$ne`: comparisons.
+- `$or` with an array: match any of several conditions.
 
 **Equality** (movies from 1994):
 
 ```javascript
-db.movies.find({ year: 1994 }).limit(3).pretty()
+db.movies.find({ year: 1994 }).limit(3)
 ```
 
-**Comparison** (movies after 2000) and **logical OR** (movies from 1999 or 2000):
+**Comparison** 
+
+movies after 2000:
+```javascript
+db.movies.find({ year: { $gt: 2000 } }).limit(3)
+```
+
+**logical OR** 
+movies from 1999 or 2000:
+```javascript
+db.movies.find({ $or: [ { year: 1999 }, { year: 2000 } ] }).limit(3)
+```
+
+### Project only some fields
+
+The second argument to `find()` is a **projection** (which fields to return):
+
+- `1` includes a field.
+- `_id: 0` omits the default `_id` (included unless you turn it off).
+
+Example: movies from 2000, returning only `title` and `year`:
 
 ```javascript
-db.movies.find({ year: { $gt: 2000 } }).limit(3).pretty()
-db.movies.find({ $or: [ { year: 1999 }, { year: 2000 } ] }).limit(3).pretty()
+db.movies.find({ year: 2000 }, { title: 1, year: 1, _id: 0 }).limit(5)
 ```
+
+**Try:** modify the command to return only `title`, `genres`, and `directors`. Non-existent field names are ignored without an error.
 
 ### More Operators
 
@@ -156,8 +235,8 @@ Use `.forEach()` to run a function over each document in the result. Example: pr
 
 ```javascript
 db.movies.find({ year: 2000 }).limit(3).forEach(function(doc) {
-  print("Movie: " + doc.title + " (" + doc.year + ")");
-});
+  print("Movie: " + doc.title + " (" + doc.year + ")")
+})
 ```
 Output:
 ```
@@ -165,6 +244,85 @@ Movie: In the Mood for Love (2000)
 Movie: State and Main (2000)
 Movie: April Captains (2000)
 ```
+
+**Try:** update the `find().sort().forEach()` chain to find movies from years 2012-2016, sort by year (most recent to oldest) then title (ascending), with no limit, and print each line in this format:
+
+```text
+Movie: Some Title (2016), directors: Name One, Name Two
+Movie: Another Title (2015), directors: Name Three
+...
+```
+
+`sample_mflix` can contain more than one document with the same title (different `_id`s). That is expected; you are iterating documents, not unique titles.
+
+<details>
+<summary>Sample solution</summary>
+
+```javascript
+db.movies.find({ year: { $gte: 2012, $lte: 2016 } }).sort({ year: -1, title: 1 }).forEach(function(doc) {
+  const directors = (doc.directors || []).join(", ")
+  print("Movie: " + doc.title + " (" + doc.year + "), directors: " + directors)
+})
+```
+
+- `.sort({ year: -1, title: 1 })` sorts by year descending, then by title ascending within the same year.
+- `directors` is an array in `sample_mflix`; `.join(", ")` turns it into a readable string.
+
+</details>
+
+### Join related collections
+
+Related data often lives in **different collections**. Instead of copying a whole movie into every comment, `sample_mflix` stores a **reference**: each comment has a `movie_id` field whose value is the `_id` of a document in `movies`.
+
+The `text` on comments is **synthetic sample data** (placeholder prose, not real reviews). Use it to practice references and joins; do not treat the wording as authentic content.
+
+This is not a SQL `JOIN`. You either look up the related document yourself, or use aggregation `$lookup` (MongoDB's server-side join).
+
+**Start from a movie students know**, then find one of its comments (stay in `sample_mflix`):
+
+```javascript
+use sample_mflix
+const movie = db.movies.findOne({ title: "The Godfather" }, { title: 1, year: 1 })
+movie
+const comment = db.comments.findOne({ movie_id: movie._id }, { name: 1, text: 1, movie_id: 1 })
+comment
+```
+
+- `comment.movie_id` is an `ObjectId` that points at `movies._id` (here, The Godfather).
+
+**Manual reference lookup** (follow the reference the other way: comment → movie):
+
+```javascript
+db.movies.findOne({ _id: comment.movie_id }, { title: 1, year: 1, _id: 0 })
+```
+
+- The filter uses the comment's `movie_id` as the movie `_id`.
+- The projection returns only `title` and `year`.
+
+**Server-side join with `$lookup`** (several comments on that same movie):
+
+```javascript
+db.comments.aggregate([
+  { $match: { movie_id: movie._id } },
+  { $limit: 3 },
+  { $lookup: {
+      from: "movies",
+      localField: "movie_id",
+      foreignField: "_id",
+      as: "movie"
+  }},
+  { $project: { name: 1, text: 1, "movie.title": 1, "movie.year": 1, _id: 0 } }
+])
+```
+
+- `$match` restricts to comments for The Godfather.
+- `$lookup` matches `comments.movie_id` to `movies._id` and stores matches in an array field named `movie` (usually one element).
+- `$project` keeps selected comment fields plus the joined movie title and year.
+- Some other comments in `sample_mflix` have a `movie_id` with no matching movie (`movie: []`). That is an orphaned reference.
+
+**Try:** change `{ title: "The Godfather" }` to another film that has comments (for example `"The Matrix"` or `"Pulp Fiction"`), or project `movie.genres` instead of `movie.year`. Some well-known titles in `sample_mflix` have **zero** comments (for example `"Casablanca"`); for those, `findOne` on comments returns `null` and the join steps will not work until you pick a title with comments.
+
+**Embed the other way (movie root, comments array):** see [`09-mongo_embed.py`](09-mongo_embed.py). That script builds one document with The Godfather as the root and all of its comments nested under `comments`, then inserts it into `mypractice.movies_with_comments`.
 
 ### Create Operations
 
@@ -176,16 +334,16 @@ Let's switch gears and create your own database and collection in the Atlas Clus
 use mypractice
 ```
 
-**Insert one document** (`insertOne`). Use a simple document structure—e.g. `name` and `quantity`.
+**Insert one document** (`insertOne`). Use a simple document structure (e.g. `name` and `quantity`).
 
 ```javascript
-db.items.insertOne({ name: "apple", quantity: 5 })
+db.fruit.insertOne({ name: "apple", quantity: 5 })
 ```
-This creates a new collection `items` and inserts a new document into it. Let's confirm:
+This creates a new collection `fruit` and inserts a new document into it. Let's confirm:
 
 ```javascript
-show collections;
-db.items.find().pretty();
+show collections
+db.fruit.find()
 ```
 Output:
 ```
@@ -203,22 +361,22 @@ Note the automatic creation of the `_id` field, containing a unique identifier f
 **Insert multiple documents** (`insertMany`). Pass an array of documents.
 
 ```javascript
-db.items.insertMany([
+db.fruit.insertMany([
   { name: "banana", quantity: 10 },
   { name: "orange", quantity: 3 }
 ])
 ```
 
-Verify with `db.items.find().pretty()`. See *Read Operations* below for querying.
+Verify with `db.fruit.find()`. See *Read Operations* below for querying.
 
 ### Read Operations
 
-Using the `mypractice` database and `items` collection from above:
+Using the `mypractice` database and `fruit` collection from above:
 
 ```javascript
-db.items.find().pretty()
-db.items.findOne({ name: "apple" })
-db.items.find({ quantity: { $gte: 5 } }).pretty()
+db.fruit.find()
+db.fruit.findOne({ name: "apple" })
+db.fruit.find({ quantity: { $gte: 5 } })
 ```
 
 ### Update Operations
@@ -226,23 +384,99 @@ db.items.find({ quantity: { $gte: 5 } }).pretty()
 Update one document with `updateOne`. The first object is the filter (which documents to update); the second uses `$set` to specify which field(s) to update and to what value(s). 
 
 ```javascript
-db.items.updateOne({ name: "apple" }, { $set: { quantity: 8 } })
+db.fruit.updateOne({ name: "apple" }, { $set: { quantity: 8 } })
 ```
 
 Update multiple documents with `updateMany`.
 ```javascript
-db.items.updateMany({ quantity: { $lt: 10 } }, { $set: { restocked: true } })
-db.items.find().pretty()
+db.fruit.updateMany({ quantity: { $lt: 10 } }, { $set: { restocked: true } })
+db.fruit.find()
 ```
+
+- Only documents matching `{ quantity: { $lt: 10 } }` get a `restocked` field (strictly less than 10, so a document with `quantity: 10` is unchanged).
+- Other documents simply have no `restocked` field. **That uneven shape is normal in MongoDB: documents in a collection need not share the same fields.**
 
 ### Delete Operations
 
 Remove documents with `deleteOne` (one match) or `deleteMany` (all matches). Use a filter to limit what is removed.
 
 ```javascript
-db.items.deleteOne({ name: "orange" })
-db.items.find().pretty()
+db.fruit.deleteOne({ name: "apple" })
+db.fruit.find()
 ```
+
+You can use the same filter styles as in [Search with filters](#search-with-filters). Example with `$or`:
+
+```javascript
+db.fruit.deleteMany({ $or: [ { name: "orange" }, { name: "apple" } ] })
+```
+
+- `$or` takes an **array** of conditions; each condition is its own object.
+- This deletes every document whose `name` is `"orange"` or `"apple"`.
+- Equivalent shorter form: `{ name: { $in: ["orange", "apple"] } }`.
+- The command result includes `deletedCount`, indicating how many documents were removed.
+
+### Delete a collection
+
+`deleteOne` / `deleteMany` remove **documents**. To remove the whole **collection** (all documents plus the collection itself), use `drop()`:
+
+```javascript
+use mypractice
+show collections
+db.fruit.drop()
+show collections
+```
+
+- `db.fruit.drop()` deletes the `fruit` collection from the current database.
+- The result is typically `true` if the collection existed and was dropped, or `false` if it did not exist.
+- After a drop, `show collections` no longer lists `fruit`. Inserting again (for example in [Insert from file](#insert-from-file)) recreates the collection.
+
+### Insert from file
+
+So far you typed documents into the shell. You can also load JSON from a file (exports, downloads, or lab sample files).
+
+Sample file: [`data/fruit.json`](data/fruit.json) (a JSON **array** of documents, ready for `insertMany`).
+
+**1.** Still inside `mongosh`, confirm the file is visible from your current working directory:
+
+```javascript
+fs.existsSync("data/fruit.json")
+```
+
+- `true`: continue to step 2.
+- `false`: you started `mongosh` from the wrong folder. Run `exit`, then in bash/zsh:
+
+```bash
+cd class/05-nosql
+```
+
+Reconnect with `mongosh` as before, and check `fs.existsSync("data/fruit.json")` again.
+
+**2.** Insert the file into the `fruit` collection:
+
+```javascript
+use mypractice
+const docs = JSON.parse(fs.readFileSync("data/fruit.json", "utf8"))
+db.fruit.insertMany(docs)
+db.fruit.find()
+```
+
+- `fs.readFileSync(...)` reads the file text from disk.
+- `JSON.parse(...)` turns that text into an array of documents.
+- `insertMany(docs)` writes those documents into `fruit`. If `fruit` does not exist yet, MongoDB creates the collection on this insert.
+- Paths are relative to the directory where you launched `mongosh` (that is why step 1 matters).
+
+### Exiting `mongosh`
+
+Before you run the Python scripts, leave the MongoDB shell and return to bash/zsh:
+
+```text
+exit
+```
+
+- Type `exit` at the `mongosh` prompt (or press Ctrl+D).
+- Your prompt should look like a normal shell again (`$` or `%`), not `Atlas ...>`.
+- Confirm you are still in `class/05-nosql` with `pwd` before continuing.
 
 ### MongoDB + Python
 
@@ -258,25 +492,27 @@ uv add pymongo
 uv run --with pymongo python -c "import pymongo; print(pymongo.__version__)"
 ```
 
-All scripts below use the same Atlas env vars as `mongosh` (`MONGODB_ATLAS_URL`, `MONGODB_ATLAS_USER`, `MONGODB_ATLAS_PWD`). Confirm they are set (`echo $MONGODB_ATLAS_USER`) before running. Work from this directory:
+- All scripts below use the same Atlas env vars as `mongosh` (`MONGODB_ATLAS_URL`, `MONGODB_ATLAS_USER`, `MONGODB_ATLAS_PWD`). 
+- Confirm they are set (`echo $MONGODB_ATLAS_USER`) before running. 
+- Confirm that you are in `class/05-nosql` (execute `pwd`; the returned path should end with that).
 
-```bash
-cd class/05-nosql
-```
+**Shared connection:** [`database.py`](database.py) builds a shared `client`, `db` (`mypractice`), and `fruit` collection. [`02-mongo_setup.py`](02-mongo_setup.py) imports that module; the other scripts open their own client with the same env vars.
 
-**Shared connection:** [`database.py`](database.py) builds a shared `client`, `db` (`mypractice`), and `items` collection. [`02-mongo_setup.py`](02-mongo_setup.py) imports that module; the other scripts open their own client with the same env vars.
+Shell and Python both use `mypractice.fruit` and the same starter names (apple, banana, orange). The **update/delete targets differ** so the Python scripts still change visible data if you already finished the mongosh exercises (mongosh: update/delete **apple**; Python: update **banana** / **orange**, delete **orange**).
 
-**Numbered scripts (run in order 01 → 07):**
+**Numbered scripts (run in order 01 → 09):**
 
 | Script | Purpose |
 |--------|---------|
 | [`01-sample_mflix.py`](01-sample_mflix.py) | Connect to `sample_mflix`, list collections and document counts |
 | [`02-mongo_setup.py`](02-mongo_setup.py) | Use shared client from `database.py`; show server version, databases, and `mypractice` collection counts |
-| [`03-mongo_create.py`](03-mongo_create.py) | Create `mypractice` / `items` and insert sample documents (apple, banana, orange) |
-| [`04-mongo_read.py`](04-mongo_read.py) | Read documents: find one, find by filter, count |
-| [`05-mongo_update.py`](05-mongo_update.py) | Update documents with `$set` |
-| [`06-mongo_delete.py`](06-mongo_delete.py) | Delete one document and show remaining |
-| [`07-mongo_summary.py`](07-mongo_summary.py) | Print final summary of `mypractice` collections and `items` |
+| [`03-mongo_create.py`](03-mongo_create.py) | Create `mypractice` / `fruit` and insert sample documents (apple, banana, orange) |
+| [`04-mongo_read.py`](04-mongo_read.py) | Read documents: find one, find banana, count |
+| [`05-mongo_update.py`](05-mongo_update.py) | Update banana quantity and set orange `restocked` (not the mongosh apple path) |
+| [`06-mongo_delete.py`](06-mongo_delete.py) | Delete orange and show remaining |
+| [`07-mongo_summary.py`](07-mongo_summary.py) | Log a final summary of `mypractice` collections and `fruit` |
+| [`08-mongo_join.py`](08-mongo_join.py) | Join `comments` to `movies` via `movie_id` (`sample_mflix`; manual lookup and `$lookup`) |
+| [`09-mongo_embed.py`](09-mongo_embed.py) | Embed comments into a movie document and save it in `mypractice.movies_with_comments` |
 
 ```bash
 uv run --with pymongo 01-sample_mflix.py
@@ -286,9 +522,11 @@ uv run --with pymongo 04-mongo_read.py
 uv run --with pymongo 05-mongo_update.py
 uv run --with pymongo 06-mongo_delete.py
 uv run --with pymongo 07-mongo_summary.py
+uv run --with pymongo 08-mongo_join.py
+uv run --with pymongo 09-mongo_embed.py
 ```
 
-If you already ran `uv add pymongo` in a project, plain `uv run 01-sample_mflix.py` (and so on) is enough.
+If you already ran `uv add pymongo` in a project, plain `uv run 01-sample_mflix.py` (and so on) is enough. Scripts `08` and `09` use `sample_mflix` and do not depend on the `fruit` CRUD scripts (you can run them after `01`). Re-running `09` inserts another copy into `movies_with_comments` each time.
 
 ## Advanced Concepts (Optional)
 

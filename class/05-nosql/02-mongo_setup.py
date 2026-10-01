@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
+"""Connection and mypractice database info (shared client from database.py)."""
+import logging
 
-from pymongo import MongoClient, errors
-import os
-# Use the shared client from database.py (same connection, mypractice db and items collection)
-from database import client, db, items
+from database import client, db, fruit
 
-# Connection and database info (mypractice db from mongosh practice)
-print("Server:", client.server_info().get("version", "?"))
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+log = logging.getLogger(__name__)
 
-dbs = client.list_database_names()
-print("Databases:", dbs)
+log.info("Server: %s", client.server_info().get("version", "?"))
+log.info("Databases: %s", client.list_database_names())
+log.info("Collections in mypractice: %s", db.list_collection_names())
 
-colls = db.list_collection_names()
-print("Collections in mypractice:", colls)
+count = fruit.count_documents({})
+log.info("%s fruit documents", count)
 
-count = items.count_documents({})
-print(count, "items")
-many = items.count_documents({"quantity": {"$gte": 5}})
-print(many, "items with quantity >= 5")
+many = fruit.count_documents({"quantity": {"$gte": 5}})
+log.info("%s fruit with quantity >= 5", many)
 
-# Close the connection
 client.close()

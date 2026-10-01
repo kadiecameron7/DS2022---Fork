@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
-"""Print summary of mypractice db after running scripts 01-06 (collections and item count)."""
+"""Log a summary of mypractice after the fruit CRUD scripts (03–06)."""
+import logging
 import os
-from pymongo import MongoClient
-from bson.json_util import dumps
 
-uri = os.getenv('MONGODB_ATLAS_URL')
-username = os.getenv('MONGODB_ATLAS_USER')
-password = os.getenv('MONGODB_ATLAS_PWD')
+from bson.json_util import dumps
+from pymongo import MongoClient
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+log = logging.getLogger(__name__)
+
+uri = os.getenv("MONGODB_ATLAS_URL")
+username = os.getenv("MONGODB_ATLAS_USER")
+password = os.getenv("MONGODB_ATLAS_PWD")
 
 client = MongoClient(uri, username=username, password=password, connectTimeoutMS=200, retryWrites=True)
 db = client.mypractice
-items = db.items
+fruit = db.fruit
 
-print("Server:", client.server_info().get("version", "?"))
-print("Collections in mypractice:", db.list_collection_names())
-print("Total items:", items.count_documents({}))
-print("All items:")
-print(dumps(list(items.find({})), indent=2))
+log.info("Server: %s", client.server_info().get("version", "?"))
+log.info("Collections in mypractice: %s", db.list_collection_names())
+log.info("Total fruit documents: %s", fruit.count_documents({}))
+log.info("All fruit documents:\n%s", dumps(list(fruit.find({})), indent=2))
 
 client.close()

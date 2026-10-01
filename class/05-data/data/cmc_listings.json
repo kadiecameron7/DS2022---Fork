@@ -1,0 +1,149 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Bitcoin",
+      "symbol": "BTC",
+      "cmc_rank": 1,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 83663.86,
+          "percent_change_24h": -0.33,
+          "market_cap": 1680883018723
+        }
+      ]
+    },
+    {
+      "id": 1027,
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "cmc_rank": 2,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 2691.63,
+          "percent_change_24h": -0.62,
+          "market_cap": 328629256628
+        }
+      ]
+    },
+    {
+      "id": 825,
+      "name": "Tether USDt",
+      "symbol": "USDT",
+      "cmc_rank": 3,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 1.0,
+          "percent_change_24h": -0.02,
+          "market_cap": 183771100705
+        }
+      ]
+    },
+    {
+      "id": 1839,
+      "name": "BNB",
+      "symbol": "BNB",
+      "cmc_rank": 4,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 764.74,
+          "percent_change_24h": 0.19,
+          "market_cap": 101831822697
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "name": "XRP",
+      "symbol": "XRP",
+      "cmc_rank": 5,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 1.51,
+          "percent_change_24h": 0.52,
+          "market_cap": 95442604626
+        }
+      ]
+    },
+    {
+      "id": 3408,
+      "name": "USDC",
+      "symbol": "USDC",
+      "cmc_rank": 6,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 1.0,
+          "percent_change_24h": 0.0,
+          "market_cap": 74351243258
+        }
+      ]
+    },
+    {
+      "id": 5426,
+      "name": "Solana",
+      "symbol": "SOL",
+      "cmc_rank": 7,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 119.54,
+          "percent_change_24h": 0.08,
+          "market_cap": 70290436997
+        }
+      ]
+    },
+    {
+      "id": 1958,
+      "name": "TRON",
+      "symbol": "TRX",
+      "cmc_rank": 8,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 0.34,
+          "percent_change_24h": 0.64,
+          "market_cap": 32109639050
+        }
+      ]
+    },
+    {
+      "id": 1437,
+      "name": "Zcash",
+      "symbol": "ZEC",
+      "cmc_rank": 9,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 1413.12,
+          "percent_change_24h": -0.33,
+          "market_cap": 23873093629
+        }
+      ]
+    },
+    {
+      "id": 32196,
+      "name": "Hyperliquid",
+      "symbol": "HYPE",
+      "cmc_rank": 10,
+      "quote": [
+        {
+          "symbol": "USD",
+          "price": 86.56,
+          "percent_change_24h": -1.84,
+          "market_cap": 21734684643
+        }
+      ]
+    }
+  ],
+  "status": {
+    "timestamp": "2026-09-30T09:36:59.639Z",
+    "error_code": "0",
+    "error_message": ""
+  }
+}

@@ -1,15 +1,10 @@
 import requests
 
-url = "https://api.coingecko.com/api/v3/coins/markets"
-params = {
-    "vs_currency": "usd",
-    "order": "market_cap_desc",
-    "per_page": 5,
-    "page": 1,
-}
+url = "https://pro-api.coinmarketcap.com/public-api/v3/cryptocurrency/listings/latest"
+params = {"limit": 5, "convert": "USD"}
 response = requests.get(url, params=params, timeout=10)
 response.raise_for_status()
 
-for coin in data["data"][:5]:
+for coin in response.json()["data"]:
     quote = coin["quote"][0]
     print(f"{coin['name']}: ${quote['price']:.2f} ({quote['percent_change_24h']:.2f}%)")

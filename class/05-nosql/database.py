@@ -14,4 +14,4 @@ client = MongoClient(
     retryWrites=True,
 )
 db = client.mypractice
-items = db.items
+fruit = db.fruit

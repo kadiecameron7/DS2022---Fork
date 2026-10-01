@@ -3,13 +3,13 @@
 JSON (JavaScript Object Notation) is the most common format for exchanging data between APIs, apps, and data pipelines. In this short in-class activity you will:
 
 1. Inspect and filter local JSON files with `jq`
-2. Fetch JSON from a public API with `curl` and `jq`
+2. Filter saved CoinMarketCap JSON responses with `jq`
 3. Parse the same kind of data in Python
 
 **Time:** about 20 minutes — **`jq` ~10 min** (Exercises 1–2), then **Python ~10 min** (Exercise 3). Work from this directory:
 
 ```bash
-cd class/06-data
+cd class/05-data
 ```
 
 Sample files live in [`data/`](data/). Full practice kit (optional later): [nmagee/json-practice](https://github.com/nmagee/json-practice/).
@@ -28,7 +28,7 @@ uv --version
 
 ### If `jq` is missing
 
-`jq` is a small standalone CLI. Package managers are the usual install path, but **Homebrew often runs a slow self-update before `brew install`**, which is painful in class. Prefer these in order:
+`jq` is a small standalone command-line tool. Package managers are the usual install path, but **Homebrew often runs a slow self-update before `brew install`**, which is painful in class. Prefer these in order:
 
 **1. Ubuntu / WSL (`apt`) — usually fast:**
 
@@ -46,7 +46,7 @@ HOMEBREW_NO_AUTO_UPDATE=1 brew install jq
 
 **3. Download the binary (no package manager):** grab the latest release for your OS from [jqlang/jq releases](https://github.com/jqlang/jq/releases), make it executable, and put it on your `PATH` (for example `~/bin`). Details: [jq download](https://jqlang.github.io/jq/download/).
 
-**In-class fallback:** if install is stuck, use [jqplay](https://jqplay.org/) in the browser for Exercise 1 (paste the JSON from `data/`), then return to the CLI when `jq` is installed.
+**In-class fallback:** if install is stuck, use [jqplay](https://jqplay.org/) in the browser for Exercise 1 (paste the JSON from `data/`), then return to the terminal when `jq` is installed.
 
 ### Running Python with a temporary package (`--with`)
 
@@ -56,10 +56,11 @@ In Lab 03 you used `uv init` / `uv add` to build a real project (`pyproject.toml
 
 ```bash
 uv run book_parse.py
-uv run --with requests crypto_fetch.py
+uv run crypto_fetch.py
+uv run --with requests crypto_fetch_api.py
 ```
 
-`book_parse.py` only needs the stdlib (`json`), so plain `uv run` is enough. `crypto_fetch.py` needs `requests`, so add `--with requests` for that one command.
+`book_parse.py` and `crypto_fetch.py` only need Python's built-in `json` module, so plain `uv run` is enough. `crypto_fetch_api.py` needs `requests`, so add `--with requests` for that one command.
 
 Use `uv add` later when a package should be a lasting dependency of a project. Use `--with` for one-off classroom scripts like these. More detail: [Try a package once with `uv run --with`](../03-scripting/README.md#try-a-package-once-with-uv-run---with).
 
@@ -102,7 +103,7 @@ Same idea as XML:
 </menu>
 ```
 
-JSON maps cleanly to Python dicts/lists. That is why APIs and NoSQL documents favor it.
+JSON maps cleanly to Python dicts and lists. That is why web APIs often use it.
 
 Peek at the local copy:
 
@@ -114,9 +115,9 @@ cat data/simple.list.json | jq .
 
 ## Exercise 1 — `jq` on local files
 
-Spend about **10 minutes** on Exercises 1–2 together (local `jq`, one agent prompt, then `curl` + `jq`). Skip optional parts if you run short.
+Spend about **10 minutes** on Exercises 1–2 together (local `jq`, one agent prompt, then the CoinMarketCap sample files). Skip optional parts if you run short.
 
-`jq` reads a JSON stream and prints filtered text. `-r` means "raw" (no quotes around strings).
+`jq` reads JSON and prints filtered text. `-r` means "raw" (no quotes around strings).
 
 ### 1a. Nested object
 
@@ -220,48 +221,60 @@ glossary down to GlossSeeAlso and print both SeeAlso strings with jq.
 
 ---
 
-## Exercise 2 — Fetch public JSON with `curl` + `jq`
+## Exercise 2 — CoinMarketCap sample JSON with `jq`
 
-Pipe a remote response into `jq` the same way you pipe a file.
+Pipe JSON into `jq` the same way as in Exercise 1. The files below are **saved responses** from [CoinMarketCap](https://coinmarketcap.com/api/documentation/pro-api-reference/keyless-public-api) (cryptocurrency prices). Use these in class so dozens of students are not blocked when the public API rejects too many requests from the same network.
 
-Google Finance has no public JSON API, so we use free market APIs that return real JSON with no signup: [CoinGecko](https://docs.coingecko.com/) (crypto) and [Frankfurter](https://frankfurter.dev/) (FX rates).
-
-### 2a. Nested object — live crypto prices
+Optional live requests (may fail in class with HTTP `403` or `429` — too many requests from a shared network):
 
 ```bash
-curl -s "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true" | jq .
+curl -s "https://pro-api.coinmarketcap.com/public-api/v1/simple/price?ids=1,1027&convert=USD" | jq .
+```
+```bash
+curl -s "https://pro-api.coinmarketcap.com/public-api/v3/cryptocurrency/listings/latest?limit=5&convert=USD" | jq .
+```
+
+If you get `403` or `429` errors, do not worry. Try again later outside class, or continue with `data/cmc_simple_price.json` and `data/cmc_listings.json` — they use the same structure as the live API responses.
+
+### 2a. Nested object — cryptocurrency prices
+
+CoinMarketCap numeric ids: `1` = Bitcoin, `1027` = Ethereum. Sample file: [`data/cmc_simple_price.json`](data/cmc_simple_price.json).
+
+```bash
+cat data/cmc_simple_price.json | jq .
 ```
 
 Pull just Bitcoin's USD price:
 
 ```bash
-curl -s "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd" | jq -r '.bitcoin.usd'
+cat data/cmc_simple_price.json | jq -r '.data[] | select(.id == 1) | .price'
 ```
 
-**Try:** print Ethereum's USD price and 24h change (`.ethereum.usd` and `.ethereum.usd_24h_change`).
+**Try:** print Ethereum's USD price (select `.id == 1027`).
 
-### 2b. Array of objects — top coins by market cap
+### 2b. Array of objects — top coins by market capitalization
+
+Sample file: [`data/cmc_listings.json`](data/cmc_listings.json) (10 coins). Each coin's US dollar price fields are under `.quote[0]` (an array), not `.quote.USD`.
 
 ```bash
-curl -s "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1" \
-  | jq -r '.[].name'
+cat data/cmc_listings.json | jq -r '.data[].name'
 ```
 
-Compact objects with name, price, and 24h change:
+Build smaller objects with name, price, and 24-hour percent change:
 
 ```bash
-curl -s "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1" \
-  | jq '[.[] | {name, price: .current_price, change_24h: .price_change_percentage_24h}]'
+cat data/cmc_listings.json \
+  | jq '[.data[] | {name, price: .quote[0].price, change_24h: .quote[0].percent_change_24h}]'
 ```
 
-**Try:** change `per_page=5` to `10`, or filter to coins whose price is above 100:
+**Try:** keep only the first five coins (`.data[:5]`), or filter to coins whose price is above 100:
 
 ```bash
-curl -s "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1" \
-  | jq '[.[] | select(.current_price > 100) | {name, price: .current_price}]'
+cat data/cmc_listings.json \
+  | jq '[.data[] | select(.quote[0].price > 100) | {name, price: .quote[0].price}]'
 ```
 
-### 2c. (Optional) FX rates or local weather
+### 2c. (Optional) Foreign currency exchange rates or local weather
 
 USD to EUR / GBP / JPY ([Frankfurter](https://frankfurter.dev/)):
 
@@ -270,7 +283,7 @@ curl -s "https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY" | j
 curl -s "https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY" | jq -r '.rates.EUR'
 ```
 
-Current weather in Charlottesville ([Open-Meteo](https://open-meteo.com/), no key):
+Current weather in Charlottesville ([Open-Meteo](https://open-meteo.com/); no API key required):
 
 ```bash
 curl -s "https://api.open-meteo.com/v1/forecast?latitude=38.03&longitude=-78.48&current=temperature_2m,wind_speed_10m" \
@@ -283,7 +296,7 @@ curl -s "https://api.open-meteo.com/v1/forecast?latitude=38.03&longitude=-78.48&
 
 ### 3a. Read a local file
 
-Open [`book_parse.py`](book_parse.py) (or run the same code in a REPL):
+Open [`book_parse.py`](book_parse.py) (or run the same code interactively in Python):
 
 ```python
 import json
@@ -320,34 +333,53 @@ for emp in data["employees"]:
 
 </details>
 
-### 3b. Fetch remote JSON
+### 3b. Load a CoinMarketCap sample file
 
-Open [`crypto_fetch.py`](crypto_fetch.py):
+Open [`crypto_fetch.py`](crypto_fetch.py) — it reads the same CoinMarketCap sample used in Exercise 2:
+
+```python
+import json
+
+with open("data/cmc_listings.json", "r") as f:
+    data = json.load(f)
+
+for coin in data["data"][:5]:
+    quote = coin["quote"][0]
+    print(f"{coin['name']}: ${quote['price']:.2f} ({quote['percent_change_24h']:.2f}%)")
+```
+
+```bash
+uv run crypto_fetch.py
+```
+
+### 3c. (Optional) Fetch live JSON with `requests`
+
+Outside class (or if the classroom network allows it), [`crypto_fetch_api.py`](crypto_fetch_api.py) downloads the same listings from CoinMarketCap:
 
 ```python
 import requests
 
-url = "https://api.coingecko.com/api/v3/coins/markets"
-params = {
-    "vs_currency": "usd",
-    "order": "market_cap_desc",
-    "per_page": 5,
-    "page": 1,
-}
+url = "https://pro-api.coinmarketcap.com/public-api/v3/cryptocurrency/listings/latest"
+params = {"limit": 5, "convert": "USD"}
 response = requests.get(url, params=params, timeout=10)
 response.raise_for_status()
 
-for coin in response.json():
-    print(f"{coin['name']}: ${coin['current_price']} ({coin['price_change_percentage_24h']:.2f}%)")
+for coin in response.json()["data"]:
+    quote = coin["quote"][0]
+    print(f"{coin['name']}: ${quote['price']:.2f} ({quote['percent_change_24h']:.2f}%)")
 ```
 
 ```bash
-uv run --with requests crypto_fetch.py
+uv run --with requests crypto_fetch_api.py
 ```
 
-**Try:** GET the Frankfurter FX endpoint and print each currency code and rate from `data["rates"]`.
+`--with requests` installs `requests` for this one command only (see [Running Python with a temporary package](#running-python-with-a-temporary-package---with)).
 
-### 3c. (Optional) Write JSON out
+If this script fails with HTTP `403` or `429` (too many requests on a shared network), use `crypto_fetch.py` and the files in `data/` instead.
+
+**Try:** change the script to download JSON from Frankfurter, then print each currency code and rate from `data["rates"]`.
+
+### 3d. (Optional) Write JSON out
 
 ```python
 import json
@@ -370,7 +402,7 @@ You should be able to:
 | Pretty-print / dig into nested keys | `jq '.path.to.field'` |
 | Iterate arrays | `jq '.[].name'` or Python `for item in data:` |
 | Load a file | `json.load(...)` |
-| Call a public API | `curl ... \| jq` or `requests.get(...).json()` |
+| Filter CoinMarketCap sample JSON | `jq` on `data/cmc_*.json` (optional live `curl`) |
 
 ---
 
@@ -381,6 +413,6 @@ You should be able to:
 - [jqplay](https://jqplay.org/)
 - [JSONLint](https://jsonlint.com/)
 - [nmagee/json-practice](https://github.com/nmagee/json-practice/) : longer jq + Python drills
-- [CoinGecko API](https://docs.coingecko.com/) : crypto prices (no key for light classroom use)
-- [Frankfurter](https://frankfurter.dev/) : ECB FX rates as JSON
-- [Open-Meteo](https://open-meteo.com/) : weather forecast API (no key)
+- [CoinMarketCap Public API](https://coinmarketcap.com/api/documentation/pro-api-reference/keyless-public-api) : cryptocurrency prices; class uses saved samples in `data/`
+- [Frankfurter](https://frankfurter.dev/) : European Central Bank foreign-exchange rates as JSON
+- [Open-Meteo](https://open-meteo.com/) : weather forecast API (no API key required)

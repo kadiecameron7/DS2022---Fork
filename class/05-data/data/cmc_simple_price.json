@@ -1,0 +1,17 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "price": 83663.86
+    },
+    {
+      "id": 1027,
+      "price": 2691.63
+    }
+  ],
+  "status": {
+    "timestamp": "2026-09-30T09:36:59.719Z",
+    "error_code": "0",
+    "error_message": ""
+  }
+}
