@@ -1,0 +1,19 @@
+[project]
+name = "05-nosql"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Kadie Cameron", email = "scn7fw@virginia.edu" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pymongo>=4.18.2",
+]
+
+[project.scripts]
+05-nosql = "05_nosql:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
