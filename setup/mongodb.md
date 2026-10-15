@@ -68,26 +68,53 @@ mongosh --version
 
 **WSL/Linux (Ubuntu):**
 
-Prefer the package manager. Most WSL setups are Ubuntu; add MongoDB’s apt repository, then install `mongodb-mongosh`:
+1. See which Ubuntu you have:
+
+```bash
+cat /etc/os-release
+```
+
+Look at the `VERSION_ID` line (for example `22.04`, `24.04`, or `26.04`).
+
+2. Pick one option below.
+
+### Option A — install with package manager (Ubuntu 22.04 or 24.04)
 
 ```bash
 # 1. Import MongoDB's public GPG key
 wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-8.0.asc
 
-# 2. Add the MongoDB apt repository for your Ubuntu release (jammy, noble, etc.)
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/8.3 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.3.list
+# 2. Add MongoDB's package source
+# Ubuntu 24.04:
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.3 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.3.list
+# Ubuntu 22.04: use the same command, but change noble to jammy
 
 # 3. Install mongosh
 sudo apt-get update
 sudo apt-get install -y mongodb-mongosh
 ```
 
-If `gnupg` is missing when importing the key, run `sudo apt-get install -y gnupg` and retry steps 1-3.
+If step 1 complains that `gnupg` is missing, run `sudo apt-get install -y gnupg` and try again.
 
 Confirm:
 
 ```bash
 mongosh --version
 ```
+
+**If install fails, it may be due to version drift between your Ubuntu version and MongoDB’s package sources. Try the install script in *Option B***.
+
+### Option B — install from script (Ubuntu 26.04, or if Option A fails)
+
+MongoDB does not provide package-manager install for Ubuntu 26.04. Do **not** reuse the 24.04 package lines on 26.04; that does not work. Use the script instead.
+
+From the course `setup` folder:
+
+```bash
+./install_mongosh.sh && source ~/.bashrc
+mongosh --version
+```
+
+This downloads `mongosh` into `~/.local/bin` and adds that folder to your `PATH` in `~/.bashrc`. No `sudo` needed.
 
 For other Linux distros, see the official [mongosh install docs](https://www.mongodb.com/docs/mongodb-shell/install/).
