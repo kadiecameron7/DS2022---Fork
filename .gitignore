@@ -2,6 +2,7 @@
 class/bundles/
 class/s3-storage/
 class/04-sql/fastapi-rds/
+class/06-s3/data/
 demos/04-sql/create_dbs.sql
 demos/04-sql/drop_tables.sql
 !class/README.md
