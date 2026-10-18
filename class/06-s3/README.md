@@ -14,7 +14,6 @@ This session focuses on **S3**, object storage for datasets, backups, and pipeli
 
 ## In-class exercises
 
-
 ### Environment
 
 Today you talk to AWS in two ways, and each needs its own tool:
