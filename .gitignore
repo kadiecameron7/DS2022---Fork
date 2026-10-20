@@ -17,6 +17,12 @@ people/nem2p/
 
 .DS_Store
 
+# AWS credentials and SSH keys (Learner Lab)
+credentials
+.aws/
+*.pem
+*.ppk
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
