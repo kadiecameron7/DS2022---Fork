@@ -41,6 +41,9 @@ This session introduces **Amazon EC2**, virtual machines you rent by the hour. B
 You need the `aws` CLI in the **terminal on your computer**. If `aws --version` fails, install it first: see [Environment (class/06-s3)](../06-s3/README.md#environment).
 
 1. On the **Learner Lab page**, click **Start Lab** and wait for the green **AWS** icon. See [Start the AWS Academy Learner Lab (class/06-s3)](../06-s3/README.md#start-the-aws-academy-learner-lab).
+
+   ![AWS Academy Learner Lab page](../../docs/images/aws-academy-learner-lab.png)
+
 2. On the **Learner Lab page**, click **AWS Details** (top right) → **AWS CLI** → **Show**. Copy the block into `~/.aws/credentials` on your computer (credentials change with every lab session).
    - **Quick tip:** In Cursor, open a chat window and enter this prompt: "open ~/.aws/credentials, create a new file if it doesn't exist". Paste your credentials. **Save the file!**
 3. On the **Learner Lab page**, click **AWS Details** → **SSH key** → **Download PEM**. Your browser downloads `labsuser.pem`, the private key of the `vockey` key pair that already exists in your lab account. Next, move it into `~/.ssh` on your computer and use `chmod` to make it read-only for you (permission: 400).
@@ -99,6 +102,9 @@ Python scripts, the `aws` command, and the AWS Console are three ways to do the 
 
 1. On the **Learner Lab page**, click the green **AWS** icon to open the **AWS Console**.
 2. In the **AWS Console**, search for **S3** in the top search bar and open it.
+
+   ![AWS Management Console via AWS Academy](../../docs/images/aws-academy-console.png)
+
 3. Find `practice-<your user name>` in the list of **General purpose buckets**. This is the bucket the script created (now or last session).
 4. Open the bucket and check the tabs **Objects**, **Properties** (region, creation date) and **Permissions** (**Block public access** is on).
 5. Optional: In the **AWS Console**, **Upload** a small file. Then list it from the **terminal on your computer**:
@@ -268,6 +274,8 @@ uv --version
 ```
 
 If the status is `error`, read the end of `/var/log/cloud-init-output.log`: it has the output of every command in `user_data.sh`. Type `exit` to return to the **terminal on your computer**.
+
+To see the user data the instance got, in the **AWS Console** select `ec2-user-data` under **EC2 → Instances**, then click **Actions** → **Instance settings** → **Edit user data**. Close the page without saving.
 
 **Clean up**
 
