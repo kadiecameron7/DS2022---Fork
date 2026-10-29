@@ -46,6 +46,7 @@ You need the `aws` CLI in the **terminal on your computer**. If `aws --version` 
 
 2. On the **Learner Lab page**, click **AWS Details** (top right) → **AWS CLI** → **Show**. Copy the block into `~/.aws/credentials` on your computer (credentials change with every lab session).
    - **Quick tip:** In Cursor, open a chat window and enter this prompt: "open ~/.aws/credentials, create a new file if it doesn't exist". Paste your credentials. **Save the file!**
+   - **If that fails:** `nano ~/.aws/credentials` Paste the text. Save the file (Ctrl+O, Enter). Exit (Ctrl+X).
 3. On the **Learner Lab page**, click **AWS Details** → **SSH key** → **Download PEM**. Your browser downloads `labsuser.pem`, the private key of the `vockey` key pair that already exists in your lab account. Next, move it into `~/.ssh` on your computer and use `chmod` to make it read-only for you (permission: 400).
 
    Open a **terminal on your computer**. Then,
