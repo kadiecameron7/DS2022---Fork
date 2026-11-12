@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
 
 # practice-<USER>: bucket names must be globally unique across all of AWS
-bucket_name = f"practice-{os.environ.get('USER', 'unknown')}"
+bucket_name = f"practice-khs3z-2"#{os.environ.get('USER', 'unknown')}"
 log.info(f"{bucket_name}")
 
 try:
